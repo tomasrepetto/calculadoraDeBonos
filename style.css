@@ -5,28 +5,28 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    }
+}
     
-    .calculator {
+.calculator {
         width: 300px;
         text-align: center;
-    }
+}
     
-    input, button {
+input, button, select {
         width: 100%;
         padding: 10px;
         margin: 10px 0;
         border: 1px solid #ddd;
         border-radius: 5px;
-    }
+}
     
-    button {
+button {
         background-color: #4CAF50;
         color: white;
         border: none;
         cursor: pointer;
-    }
+}
     
-    button:hover {
+button:hover {
         opacity: 0.8;
-    }
+}
