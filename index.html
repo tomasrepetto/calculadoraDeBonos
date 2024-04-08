@@ -10,7 +10,12 @@
 <div class="calculator">
     <h1>Calculadora de Bonos</h1>
     <form id="bondForm">
-        <input type="text" id="bondName" placeholder="Nombre del Bono" required>
+        <select id="bondName" required>
+            <option value="">Selecciona un bono</option>
+            <option value="bono1">Bono 1</option>
+            <option value="bono2">Bono 2</option>
+            <option value="bono3">Bono 3</option>
+        </select>
         <input type="date" id="date" required>
         <input type="number" id="quantity" placeholder="Cantidad de Títulos" min="1" required>
         <input type="number" id="price" placeholder="Precio" step="any" required>
