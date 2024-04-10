@@ -13,13 +13,45 @@
                 <option value="">Selecciona un bono</option>
                 <!-- Las opciones se cargarán aquí desde datos.json -->
             </select>        
-            <input type="date" id="date" required>
-            <input type="number" id="quantity" placeholder="Cantidad de Títulos" min="1" required>
-            <input type="number" id="price" placeholder="Precio" step="any" required>
+            <input type="date" id="startDate" required>
+            <select id="opcionCalculo">
+                <option value="cantidadTitulos">Cantidad de títulos</option>
+                <option value="montoInvertir">Monto a invertir</option>
+            </select>
+            <input type="number" id="inputCantidad" placeholder="Valor" min="1" required>
+            <input type="number" id="precio" placeholder="Precio" step="any" required>
+            <div id="resultadoCalculo">Cantidad de titulos a invertir: </div>
             <div id="tipoCambioTexto">Tipo de cambio: </div>
             <button type="submit">Calcular</button>
         </form>
-        <div id="result"></div>
+        <div id="result">
+            <!-- Asegúrate de que esta estructura se genere después de realizar los cálculos -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Valor Residual</th>
+                        <th>Interes</th>
+                        <th>Capital</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos de cada fila se insertarán aquí mediante JavaScript -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Total</td>
+                        <td id="totalValorResidual"></td>
+                        <td id="totalInteres"></td>
+                        <td id="totalCapital"></td>
+                        <td id="totalGeneral"></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div id="tir">TIR: <span id="valorTIR"></span>%</div>
+            <div id="retornoDirecto">RETORNO DIRECTO: <span id="valorRetornoDirecto"></span>%</div>
+        </div>
     </div>
 
     <script src="calculadora.js"></script>

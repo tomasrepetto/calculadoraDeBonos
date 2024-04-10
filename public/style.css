@@ -12,7 +12,7 @@ body {
     text-align: center;
 }
 
-input, button, select, #tipoCambioTexto, #monedaTexto {
+input, button, select, #tipoCambioTexto, #monedaTexto, #cantidadBonos {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
@@ -29,4 +29,28 @@ button {
 
 button:hover {
     opacity: 0.8;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: darkcyan;
+    color: white;
+}
+
+tfoot {
+    font-weight: bold;
+}
+
+#tir, #retornoDirecto {
+    margin-top: 10px;
 }
