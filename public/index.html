@@ -15,12 +15,13 @@
             </select>        
             <input type="date" id="startDate" required>
             <select id="opcionCalculo">
+                <option value="">Selecciona una opcion</option>
                 <option value="cantidadTitulos">Cantidad de títulos</option>
                 <option value="montoInvertir">Monto a invertir</option>
             </select>
             <input type="number" id="inputCantidad" placeholder="Valor" min="1" required>
             <input type="number" id="precio" placeholder="Precio" step="any" required>
-            <div id="resultadoCalculo">Cantidad de titulos a invertir: </div>
+            <div id="resultadoCalculo">Nominales a adquirir: </div>
             <div id="tipoCambioTexto">Tipo de cambio: </div>
             <button type="submit">Calcular</button>
         </form>
@@ -32,7 +33,7 @@
                         <th>Fecha</th>
                         <th>Valor Residual</th>
                         <th>Interes</th>
-                        <th>Capital</th>
+                        <th>Amortizacion</th>
                         <th>Total</th>
                     </tr>
                 </thead>
@@ -44,7 +45,7 @@
                         <td>Total</td>
                         <td id="totalValorResidual"></td>
                         <td id="totalInteres"></td>
-                        <td id="totalCapital"></td>
+                        <td id="totalAmortizacion"></td>
                         <td id="totalGeneral"></td>
                     </tr>
                 </tfoot>

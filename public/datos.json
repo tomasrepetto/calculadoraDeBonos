@@ -5,12 +5,10 @@
         },
         {
             "id": "AL30",
-            "valorTecnico": 100.19,
-            "capitalResidual": 100,
-            "paridad": 59.88,
-            "intCorrido": 0.19,
             "tipoCambio": "Dolares",
-            "fechaInicio": "2020-07-10"
+            "fechaInicio": "2020-07-10",
+            "vr": 100,
+            "09/07/2024":  4.000
         },
         {
             "id": "AL35"
