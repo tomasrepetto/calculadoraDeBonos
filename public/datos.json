@@ -6,9 +6,10 @@
         {
             "id": "AL30",
             "tipoCambio": "Dolares",
-            "fechaInicio": "2020-07-10",
-            "vr": 100,
-            "09/07/2024":  4.000
+            "fechaPrimerPago": "2021-07-09",
+            "fechaLimite": "2030-07-09",
+            "fechaObjetivo": "2024-07-09",
+            "fechaCorte": "2027-07-09"
         },
         {
             "id": "AL35"

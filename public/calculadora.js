@@ -1,4 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
+    cargarBonos();
+    document.getElementById('bondName').addEventListener('change', cambiarTipoCambio);
+    document.getElementById('opcionCalculo').addEventListener('change', actualizarPlaceholder);
+    document.getElementById('inputCantidad').addEventListener('input', calcularResultado);
+    document.getElementById('precio').addEventListener('input', calcularResultado);
+    document.getElementById('bondForm').addEventListener('submit', manejarFormularioBonos);
+    actualizarPlaceholder(); 
+});
+
+function cargarBonos() {
     fetch('datos.json')
     .then(response => response.json())
     .then(data => {
@@ -9,242 +19,165 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     })
     .catch(error => console.error('Error al cargar los bonos:', error));
+}
 
-    document.getElementById('bondName').addEventListener('change', function() {
-        const selectedSymbol = this.value;
-        fetch('datos.json')
-        .then(response => response.json())
-        .then(data => {
-            const selectedBond = data.bonos.find(bono => bono.id === selectedSymbol);
-            if (selectedBond && selectedBond.tipoCambio) {
-                document.getElementById('tipoCambioTexto').innerText = `Tipo de cambio: ${selectedBond.tipoCambio}`;
-            } else {
-                // Puedes manejar el caso de no encontrar el bono o no tener tipo de cambio definido.
-                document.getElementById('tipoCambioTexto').innerText = 'Tipo de cambio no disponible';
-            }
-        })
-        .catch(error => console.error('Error al procesar la selección de bonos:', error));
-    });
-});
-
-// Asegúrate de implementar y llamar a las funciones que manejan los cálculos
-// cuando sea necesario, por ejemplo después de un evento 'submit' en tu formulario.
-
-// Elegir cantidad de titulos o importe
-
-document.addEventListener('DOMContentLoaded', function() {
-document.getElementById('opcionCalculo').addEventListener('change', actualizarPlaceholder);
-document.getElementById('inputCantidad').addEventListener('input', calcularResultado);
-document.getElementById('precio').addEventListener('input', calcularResultado);
-
-    function actualizarPlaceholder() {
-        const opcion = document.getElementById('opcionCalculo').value;
-        const inputCantidad = document.getElementById('inputCantidad');
-        if (opcion === 'cantidadTitulos') {
-            inputCantidad.placeholder = "Cantidad de Títulos";
-        } else {
-            inputCantidad.placeholder = "Monto a invertir";
+function cambiarTipoCambio() {
+    const selectedSymbol = document.getElementById('bondName').value;
+    fetch('datos.json')
+    .then(response => response.json())
+    .then(data => {
+        const selectedBond = data.bonos.find(bono => bono.id === selectedSymbol);
+        document.getElementById('tipoCambioTexto').innerText = selectedBond ? `Tipo de cambio: ${selectedBond.tipoCambio}` : 'Tipo de cambio no disponible';
+        if (selectedBond && selectedBond.fechaLimite) {
+            document.getElementById('tipoCambioTexto').setAttribute('data-fecha-limite', selectedBond.fechaLimite);
         }
-        // Limpia el resultado al cambiar la opción
+    })
+    .catch(error => console.error('Error al procesar la selección de bonos:', error));
+}
+
+function actualizarPlaceholder() {
+    const opcion = document.getElementById('opcionCalculo').value;
+    document.getElementById('inputCantidad').placeholder = opcion === 'cantidadTitulos' ? "Cantidad de Títulos" : "Monto a invertir";
+    document.getElementById('resultadoCalculo').innerText = '';  
+}
+
+function calcularResultado() {
+    const opcion = document.getElementById('opcionCalculo').value;
+    const valorInput = document.getElementById('inputCantidad').value;
+    const precioInput = document.getElementById('precio').value;
+
+    if (!valorInput || !precioInput || isNaN(valorInput) || isNaN(precioInput) || precioInput <= 0) {
         document.getElementById('resultadoCalculo').innerText = '';
+        return;
     }
 
-    function calcularResultado() {
-        const opcion = document.getElementById('opcionCalculo').value;
-        const valorInput = document.getElementById('inputCantidad').value;
-        const precioInput = document.getElementById('precio').value;
+    const resultado = opcion === 'montoInvertir' ? (parseFloat(valorInput) / parseFloat(precioInput)) * 100 : parseFloat(valorInput);
+    document.getElementById('resultadoCalculo').innerText = `Nominales a adquirir: ${Math.round(resultado).toLocaleString('de-DE')}`;
+}
 
-        if (!valorInput || !precioInput || isNaN(valorInput) || isNaN(precioInput) || precioInput <= 0) {
-            document.getElementById('resultadoCalculo').innerText = '';
-            return;
-        }
-
-        const valor = parseFloat(valorInput);
-        const precio = parseFloat(precioInput);
-        let resultado;
-
-        if (opcion === 'montoInvertir' && precio > 0) {
-            resultado = valor / precio * 100;
-        } else {
-            resultado = valor; // Se mantiene el valor ingresado sin cambios
-        }
-
-        document.getElementById('resultadoCalculo').innerText = `Nominales a adquirir: ${Math.round(resultado).toLocaleString('de-DE')}`; // Redondea el resultado para no mostrar decimales
-    }
-
-    actualizarPlaceholder(); // Para establecer el placeholder correcto al cargar la página
-});
-
-
-// Calcular FECHAS
-
-document.getElementById('bondForm').addEventListener('submit', function(e) {
+function manejarFormularioBonos(e) {
     e.preventDefault();
-    
-    const fechaUsuario = new Date(document.getElementById('startDate').value);
     const bonoSeleccionado = document.getElementById('bondName').value;
-    const cantidadTitulos = parseFloat(document.getElementById('inputCantidad').value); // Asegúrate de que este campo exista y esté lleno
-
     fetch('datos.json')
     .then(response => response.json())
     .then(data => {
         const bono = data.bonos.find(b => b.id === bonoSeleccionado);
-        if (bono && bono.fechaInicio && !isNaN(cantidadTitulos)) {
-            const fechaInicioBono = new Date(bono.fechaInicio);
-            const fechasDesdeUsuario = agregarFechasDesdeUsuario(fechaInicioBono, fechaUsuario);
-            actualizarResultados(fechasDesdeUsuario, cantidadTitulos); // Pasando cantidadTitulos correctamente
+        if (bono) {
+            const fechaPrimerPago = new Date(bono.fechaPrimerPago);
+            const fechaLimite = new Date(bono.fechaLimite);
+            const fechaObjetivo = new Date(bono.fechaObjetivo);
+            const fechaCorte = new Date(bono.fechaCorte); // Cargar fechaCorte desde el JSON
+            const fechaUsuario = new Date(document.getElementById('startDate').value);
+            const cantidadTitulos = parseFloat(document.getElementById('inputCantidad').value);
+            const fechasDesdeUsuario = agregarFechasDesdeUsuario(fechaPrimerPago, fechaLimite, fechaUsuario);
+            actualizarResultados(fechasDesdeUsuario, cantidadTitulos, fechaUsuario, fechaObjetivo, fechaCorte); // Pasar fechaCorte a la función
         } else {
-            console.error('Error: Datos del bono incompletos o cantidad de títulos no válida.');
+            console.error('Error: Datos del bono incompletos.');
         }
     })
-    .catch(error => console.error('Error al obtener datos del bono:', error));
-});
+    .catch(error => {
+        console.error('Error al obtener datos del bono:', error);
+    });
+}
 
-
-function agregarFechasDesdeUsuario(fechaInicio, fechaUsuario) {
+function agregarFechasDesdeUsuario(fechaPrimerPago, fechaLimite, fechaUsuario) {
     const fechas = [];
-    let fechaActual = new Date(fechaInicio);
+    let fechaActual = new Date(Date.UTC(fechaPrimerPago.getFullYear(), fechaPrimerPago.getMonth(), fechaPrimerPago.getDate()));
+    let limite = new Date(Date.UTC(fechaLimite.getFullYear(), fechaLimite.getMonth(), fechaLimite.getDate()));
+    let usuario = new Date(Date.UTC(fechaUsuario.getFullYear(), fechaUsuario.getMonth(), fechaUsuario.getDate()));
 
-    // Asegúrate de que la fecha de inicio sea anterior a la fecha del usuario.
-    while(fechaActual <= fechaUsuario) {
-        fechaActual.setMonth(fechaActual.getMonth() + 6);
-    }
-
-    const fechaFinal = new Date(fechaInicio);
-    fechaFinal.setFullYear(fechaFinal.getFullYear() + 10);
-    fechaFinal.setMonth(fechaFinal.getMonth() + 1); // Añadir 6 meses adicionales para los 10 años y medio
-
-    // Ahora, comienza a agregar fechas desde la fecha del usuario hasta 10 años y medio después de la fecha de inicio.
-    while (fechaActual <= fechaFinal) {
-        fechas.push(new Date(fechaActual));
-        fechaActual.setMonth(fechaActual.getMonth() + 6);
+    while (fechaActual <= limite) {
+        if (fechaActual >= usuario) {
+            let fechaMostrar = new Date(fechaActual.getTime() + (24 * 60 * 60 * 1000)); // Suma 24 horas
+            fechas.push(new Date(fechaMostrar.getUTCFullYear(), fechaMostrar.getUTCMonth(), fechaMostrar.getUTCDate()));
+        }
+        fechaActual.setUTCMonth(fechaActual.getUTCMonth() + 6);
     }
 
     return fechas;
 }
 
-function actualizarResultados(fechas, cantidadTitulos) {
-    const tbody = document.querySelector('#result tbody');
+function actualizarResultados(fechas, cantidadTitulos, fechaUsuario, fechaObjetivo, fechaCorte) {
+    const tbody = document.querySelector('#result table tbody');
     tbody.innerHTML = '';
-    let fechaInicio = true;
-
-    // Variables para acumular totales
     let totalAmortizacion = 0;
-    let amortizacionAnterior = 0; // Para almacenar la amortización de la fila anterior
-    let valorResidualActual = cantidadTitulos / 100; // Calcula el primer valor residual fuera del bucle
-    let totalValorResidual = 0;
+    let totalInteres = 0;
+    let totalGeneral = 0;
+    let totalFftir = 0;
+    let totalValor = 0;
 
-    fechas.forEach((fecha, index) => {
-        let amortizacion;
+    const usuarioTime = fechaUsuario.getTime();
+    const objetivoTime = fechaObjetivo.getTime();
 
-        if (fechaInicio) {
-            amortizacion = cantidadTitulos / 25; // Primer valor en la primera fila
-            fechaInicio = false;
+    let sumaAmortizaciones = 0;
+    let sumaAmortizacionesHastaUsuario = 0;
+    let primerPagoGrandeAplicado = false;
+    let residual = 100;  // Iniciar residual con 100
+
+    fechas.forEach((fecha) => {
+        const fechaTime = fecha.getTime();
+
+        let amortizacion = 0, interes = 0, total = 0, fftir = 0;
+        let tasaAnualInteres = fecha >= fechaCorte ? 0.0175 : 0.0075;
+
+        if (!primerPagoGrandeAplicado && usuarioTime <= objetivoTime) {
+            amortizacion = cantidadTitulos / 25; // Primer pago grande
+            primerPagoGrandeAplicado = true;
         } else {
-            amortizacion = cantidadTitulos / 12.5; // Resto de valores en las siguientes filas
+            amortizacion = cantidadTitulos / 12.5; // Pagos normales
         }
 
-        // Acumula el total de amortización
-        totalAmortizacion += amortizacion;
+        sumaAmortizaciones += amortizacion;
 
-        if (index !== 0) { // Desde la segunda fila en adelante
-            valorResidualActual -= amortizacionAnterior / 100;
+        if (fechaTime <= usuarioTime) {
+            sumaAmortizacionesHastaUsuario += amortizacion;
         }
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${formatearFecha(fecha)}</td>
-            <td>${valorResidualActual.toLocaleString('de-DE')}</td>  <!-- Valor Residual calculado y formateado -->
-            <td></td>  <!-- Interes vacío -->
-            <td>${amortizacion.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>  <!-- Amortización formateada -->
-            <td></td>  <!-- Total vacío -->
-        `;
-        tbody.appendChild(tr);
-
-        // Guardar la amortización actual para usarla en la siguiente iteración
-        amortizacionAnterior = amortizacion;
-    });
-
-    // Actualizar el total de amortización en el pie de tabla
-    document.getElementById('totalAmortizacion').textContent = totalAmortizacion.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-}
-
-
-function actualizarResultados(fechas, cantidadTitulos) {
-    const tbody = document.querySelector('#result tbody');
-    tbody.innerHTML = '';
-    let fechaInicio = true;
-
-    // Variables para acumular totales
-    let totalAmortizacion = 0;
-    let totalInteres = 0;  // Variable para acumular el total de interés
-    let totalGeneral = 0;  // Variable para acumular el total general (interés + amortización)
-    let amortizacionAnterior = 0; // Para almacenar la amortización de la fila anterior
-    let valorResidualActual = cantidadTitulos / 100; // Calcula el primer valor residual fuera del bucle
-    let totalValorResidual = 0; // No usada en este ejemplo, pero definida para completitud
-
-    fechas.forEach((fecha, index) => {
-        let amortizacion, interes, total;
-        let tasaAnualInteres;
-
-        if (fechaInicio) {
-            amortizacion = cantidadTitulos / 25; // Primer valor en la primera fila
-            fechaInicio = false;
-        } else {
-            amortizacion = cantidadTitulos / 12.5; // Resto de valores en las siguientes filas
+        if (fecha.getTime() > objetivoTime) {
+            // Aplicar la reducción del residual solo después de pasar la fecha objetivo
+            residual = 100 - (sumaAmortizacionesHastaUsuario / 100);
+            sumaAmortizacionesHastaUsuario = 0;  // Reiniciar la suma de amortizaciones hasta usuario para el siguiente ciclo
         }
 
-        // Acumula el total de amortización
-        totalAmortizacion += amortizacion;
-
-        if (index !== 0) { // Desde la segunda fila en adelante
-            valorResidualActual -= amortizacionAnterior / 100;
-        }
-
-        // Asignar la tasa de interés basada en el número de fila
-        if (index < 6) {
-            tasaAnualInteres = 0.0075; // 0.75% para las primeras 6 filas
-        } else {
-            tasaAnualInteres = 0.0175; // 1.75% para el resto
-        }
-
-        // Calcular el interés según la fórmula dada
-        interes = (cantidadTitulos * (valorResidualActual / 100) * tasaAnualInteres) / 2;
-
-        // Acumula el total de interés
+        interes = residual * tasaAnualInteres;
         totalInteres += interes;
-
-        // Calcula el total sumando interés y amortización
+        fftir = (interes + amortizacion) / residual;
         total = interes + amortizacion;
-
-        // Acumula el total general
+        totalAmortizacion += amortizacion;
         totalGeneral += total;
+        totalFftir += fftir;
+        totalValor = residual;
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${formatearFecha(fecha)}</td>
-            <td>${Math.round(valorResidualActual).toLocaleString('de-DE')}</td>  <!-- Valor Residual calculado y formateado sin decimales -->
-            <td>${interes.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>  <!-- Interés calculado y formateado -->
-            <td>${amortizacion.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>  <!-- Amortización formateada -->
-            <td>${total.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>  <!-- Total calculado y formateado -->
-        `;
-        tbody.appendChild(tr);
-
-        // Guardar la amortización actual para usarla en la siguiente iteración
-        amortizacionAnterior = amortizacion;
+        if (fecha > fechaUsuario) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${formatearFecha(fecha)}</td>
+                <td>${Math.round(residual).toLocaleString('de-DE')}</td>
+                <td>${interes.toFixed(2).toLocaleString('de-DE')}</td>
+                <td>${amortizacion.toFixed(2).toLocaleString('de-DE')}</td>
+                <td>${fftir.toFixed(2).toLocaleString('de-DE')}</td>
+                <td>${total.toFixed(2).toLocaleString('de-DE')}</td>
+            `;
+            tbody.appendChild(tr);
+        }
     });
 
-    // Actualizar el total de amortización, el total de interés y el total general en el pie de tabla
-    document.getElementById('totalAmortizacion').textContent = totalAmortizacion.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('totalInteres').textContent = totalInteres.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('totalGeneral').textContent = totalGeneral.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('totalAmortizacion').textContent = totalAmortizacion.toFixed(2).toLocaleString('de-DE');
+    document.getElementById('totalInteres').textContent = totalInteres.toFixed(2).toLocaleString('de-DE');
+    document.getElementById('totalGeneral').textContent = totalGeneral.toFixed(2).toLocaleString('de-DE');
+    document.getElementById('totalFftir').textContent = totalFftir.toFixed(2).toLocaleString('de-DE');
 }
+
 
 
 function formatearFecha(fecha) {
+    if (!(fecha instanceof Date) || isNaN(fecha.getTime())) {
+        console.error('Fecha proporcionada no es válida:', fecha);
+        return 'Fecha no válida';
+    }
+
     const dia = ('0' + fecha.getDate()).slice(-2);
     const mes = ('0' + (fecha.getMonth() + 1)).slice(-2);
     const año = fecha.getFullYear();
     return `${dia}-${mes}-${año}`;
 }
-

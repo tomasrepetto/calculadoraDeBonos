@@ -9,31 +9,41 @@
     <div class="calculator">
         <h1>Calculadora de Bonos</h1>
         <form id="bondForm">
+            <label for="bondName">Selecciona un bono:</label>
             <select id="bondName" required>
                 <option value="">Selecciona un bono</option>
                 <!-- Las opciones se cargarán aquí desde datos.json -->
             </select>        
+
+            <label for="startDate">Fecha de inicio:</label>
             <input type="date" id="startDate" required>
+
+            <label for="opcionCalculo">Tipo de cálculo:</label>
             <select id="opcionCalculo">
-                <option value="">Selecciona una opcion</option>
+                <option value="">Selecciona una opción</option>
                 <option value="cantidadTitulos">Cantidad de títulos</option>
                 <option value="montoInvertir">Monto a invertir</option>
             </select>
+
+            <label for="inputCantidad">Cantidad:</label>
             <input type="number" id="inputCantidad" placeholder="Valor" min="1" required>
+
+            <label for="precio">Precio por título:</label>
             <input type="number" id="precio" placeholder="Precio" step="any" required>
+
             <div id="resultadoCalculo">Nominales a adquirir: </div>
             <div id="tipoCambioTexto">Tipo de cambio: </div>
             <button type="submit">Calcular</button>
         </form>
         <div id="result">
-            <!-- Asegúrate de que esta estructura se genere después de realizar los cálculos -->
             <table>
                 <thead>
                     <tr>
                         <th>Fecha</th>
                         <th>Valor Residual</th>
-                        <th>Interes</th>
-                        <th>Amortizacion</th>
+                        <th>Interés</th>
+                        <th>Amortización</th>
+                        <th>FFTIR</th> <!-- Nueva columna FFTIR -->
                         <th>Total</th>
                     </tr>
                 </thead>
@@ -46,15 +56,16 @@
                         <td id="totalValorResidual"></td>
                         <td id="totalInteres"></td>
                         <td id="totalAmortizacion"></td>
+                        <td id="totalFftir"></td> <!-- Lugar para el total de FFTIR, si es necesario -->
                         <td id="totalGeneral"></td>
                     </tr>
                 </tfoot>
             </table>
             <div id="tir">TIR: <span id="valorTIR"></span>%</div>
             <div id="retornoDirecto">RETORNO DIRECTO: <span id="valorRetornoDirecto"></span>%</div>
-        </div>
+        </div>        
     </div>
-
-    <script src="calculadora.js"></script>
+    <script src="calculadora.js" defer></script>
 </body>
 </html>
+

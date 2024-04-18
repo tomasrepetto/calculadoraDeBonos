@@ -8,9 +8,23 @@ body {
 }
 
 .calculator {
-    width: 300px;
+    width: 400px;
     text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
+
+label {
+    display: block; /* Asegura que la etiqueta ocupe su propia línea */
+    margin-bottom: 5px; /* Espacio entre la etiqueta y el input */
+    margin-left: 5px;
+    color: #333; /* Color oscuro para mejor lectura */
+    text-align: left;
+}
+
 
 input, button, select, #tipoCambioTexto, #monedaTexto, #cantidadBonos {
     width: 100%;
@@ -53,4 +67,31 @@ tfoot {
 
 #tir, #retornoDirecto {
     margin-top: 10px;
+}
+
+input, button, select {
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+input:focus, button:focus, select:focus {
+    box-shadow: 0 0 5px rgba(0, 139, 139, 0.5); /* Añade un glow cuando se enfoca */
+}
+
+form{
+    width: 400px;
+}
+
+.hidden {
+    display: none;
+}
+
+
+@media (max-width: 600px) {
+    .calculator {
+        width: 100%; /* Ocupa todo el ancho en dispositivos pequeños */
+    }
+
+    input, select, button {
+        padding: 8px; /* Menos padding para pantallas pequeñas */
+    }
 }
