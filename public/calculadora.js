@@ -104,17 +104,20 @@ function actualizarResultados(fechas, cantidadTitulos, fechaUsuario, fechaObjeti
     let totalInteres = 0;
     let totalGeneral = 0;
     let totalFftir = 0;
-    let totalValor = 0;
+    let residual = 100;  // Iniciar residual con 100
 
     const usuarioTime = fechaUsuario.getTime();
     const objetivoTime = fechaObjetivo.getTime();
 
     let sumaAmortizaciones = 0;
-    let sumaAmortizacionesHastaUsuario = 0;
     let primerPagoGrandeAplicado = false;
-    let residual = 100;  // Iniciar residual con 100
+    let ajusteResidualHecho = false;
 
     fechas.forEach((fecha) => {
+        const fechaId = formatearFechaParaId(fecha);
+        const tr = document.createElement('tr');
+        tr.id = `fecha-${fechaId}`; // Asignar el ID formateado a cada fila
+
         const fechaTime = fecha.getTime();
 
         let amortizacion = 0, interes = 0, total = 0, fftir = 0;
@@ -129,37 +132,30 @@ function actualizarResultados(fechas, cantidadTitulos, fechaUsuario, fechaObjeti
 
         sumaAmortizaciones += amortizacion;
 
-        if (fechaTime <= usuarioTime) {
-            sumaAmortizacionesHastaUsuario += amortizacion;
+        if (fecha.getTime() === objetivoTime) {
+            residual = cantidadTitulos / 100;
+            ajusteResidualHecho = true;
+        } else if (fechaTime > objetivoTime && ajusteResidualHecho) {
+            residual = sumaAmortizaciones - (cantidadTitulos / 100);
         }
 
-        if (fecha.getTime() > objetivoTime) {
-            // Aplicar la reducción del residual solo después de pasar la fecha objetivo
-            residual = 100 - (sumaAmortizacionesHastaUsuario / 100);
-            sumaAmortizacionesHastaUsuario = 0;  // Reiniciar la suma de amortizaciones hasta usuario para el siguiente ciclo
-        }
-
-        interes = residual * tasaAnualInteres;
+        interes = tasaAnualInteres * 100;
         totalInteres += interes;
         fftir = (interes + amortizacion) / residual;
         total = interes + amortizacion;
         totalAmortizacion += amortizacion;
         totalGeneral += total;
         totalFftir += fftir;
-        totalValor = residual;
 
-        if (fecha > fechaUsuario) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${formatearFecha(fecha)}</td>
-                <td>${Math.round(residual).toLocaleString('de-DE')}</td>
-                <td>${interes.toFixed(2).toLocaleString('de-DE')}</td>
-                <td>${amortizacion.toFixed(2).toLocaleString('de-DE')}</td>
-                <td>${fftir.toFixed(2).toLocaleString('de-DE')}</td>
-                <td>${total.toFixed(2).toLocaleString('de-DE')}</td>
-            `;
-            tbody.appendChild(tr);
-        }
+        tr.innerHTML = `
+            <td>${formatearFecha(fecha)}</td>
+            <td>${Math.round(residual).toLocaleString('de-DE')}</td>
+            <td>${interes.toFixed(2).toLocaleString('de-DE')}</td>
+            <td>${amortizacion.toFixed(2).toLocaleString('de-DE')}</td>
+            <td>${fftir.toFixed(2).toLocaleString('de-DE')}</td>
+            <td>${total.toFixed(2).toLocaleString('de-DE')}</td>
+        `;
+        tbody.appendChild(tr);
     });
 
     document.getElementById('totalAmortizacion').textContent = totalAmortizacion.toFixed(2).toLocaleString('de-DE');
@@ -168,7 +164,9 @@ function actualizarResultados(fechas, cantidadTitulos, fechaUsuario, fechaObjeti
     document.getElementById('totalFftir').textContent = totalFftir.toFixed(2).toLocaleString('de-DE');
 }
 
-
+function formatearFechaParaId(fecha) {
+    return `${fecha.getFullYear()}${('0' + (fecha.getMonth() + 1)).slice(-2)}${('0' + fecha.getDate()).slice(-2)}`;
+}
 
 function formatearFecha(fecha) {
     if (!(fecha instanceof Date) || isNaN(fecha.getTime())) {
